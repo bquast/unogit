@@ -1,4 +1,10 @@
-import { createHash } from "@cfworker/crypto";
+async function sha256(text) {
+  const data = new TextEncoder().encode(text);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map(b => b.toString(16).padStart(2, "0"))
+    .join("");
+}
 
 export default {
   async fetch(request, env, ctx) {
@@ -23,17 +29,10 @@ export default {
       return new Response("User already exists", { status: 409 });
     }
 
-    const hashBuffer = await createHash("SHA-256").digest(password);
-    const hashHex = Array.from(new Uint8Array(hashBuffer))
-      .map(b => b.toString(16).padStart(2, "0"))
-      .join("");
-
+    const hashHex = await sha256(password);
     const userId = crypto.randomUUID();
 
-    await env.KV_USERS.put(email, JSON.stringify({
-      userId,
-      passwordHash: hashHex
-    }));
+    await env.KV_USERS.put(email, JSON.stringify({ userId, passwordHash: hashHex }));
 
     return new Response("Signup successful", { status: 200 });
   }

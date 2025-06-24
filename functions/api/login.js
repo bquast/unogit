@@ -1,4 +1,10 @@
-import { createHash } from "@cfworker/crypto";
+async function sha256(text) {
+  const data = new TextEncoder().encode(text);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map(b => b.toString(16).padStart(2, "0"))
+    .join("");
+}
 
 function jsonResponse(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -33,18 +39,13 @@ export default {
     }
 
     const user = JSON.parse(userRaw);
-
-    const hashBuffer = await createHash("SHA-256").digest(password);
-    const hashHex = Array.from(new Uint8Array(hashBuffer))
-      .map(b => b.toString(16).padStart(2, "0"))
-      .join("");
+    const hashHex = await sha256(password);
 
     if (hashHex !== user.passwordHash) {
       return new Response("Invalid credentials", { status: 403 });
     }
 
     const token = `${user.userId}:${hashHex}`;
-
     return jsonResponse({ token });
   }
 };
