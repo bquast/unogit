@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>unogit – Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; padding: 1rem; }
+    input, textarea, button { display: block; margin: 0.5rem 0; width: 100%; padding: 0.5rem; }
+    pre { background: #eee; padding: 1rem; overflow-x: auto; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+  <h2>unogit dashboard</h2>
+
+  <label>Your email (owner):</label>
+  <input type="text" id="user">
+
+  <label>Repo name:</label>
+  <input type="text" id="repo">
+
+  <label>File content:</label>
+  <textarea id="content" rows="10" placeholder="console.log('hello world');"></textarea>
+
+  <button onclick="upload()">Upload New Version</button>
+
+  <p id="status" class="error"></p>
+  <pre id="response"></pre>
+
+  <script>
+    const token = localStorage.getItem('unogit_token');
+
+    if (!token) {
+      location.href = '/index.html';
+    }
+
+    async function upload() {
+      const user = document.getElementById('user').value;
+      const repo = document.getElementById('repo').value;
+      const content = document.getElementById('content').value;
+
+      const res = await fetch(`/api/${user}/${repo}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ content })
+      });
+
+      const status = document.getElementById('status');
+      const output = document.getElementById('response');
+
+      if (res.ok) {
+        const json = await res.json();
+        status.textContent = 'Success! Version ' + json.version;
+        output.textContent = '';
+      } else {
+        status.textContent = 'Error: ' + res.status;
+        output.textContent = await res.text();
+      }
+    }
+  </script>
+</body>
+</html>
