@@ -2,8 +2,7 @@ name = "unogit"
 main = "functions/api/index.js"
 compatibility_date = "2024-06-01"
 
-[kv_namespaces]
-bindings = [
+kv_namespaces = [
   { binding = "KV_USERS", id = "your-kv-users-id" },
   { binding = "KV_REPOS", id = "your-kv-repos-id" },
   { binding = "KV_VERSIONS", id = "your-kv-versions-id" }
