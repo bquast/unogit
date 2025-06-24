@@ -16,7 +16,7 @@ export default {
     }
 
     // Match /api/:user/:repo
-    const match = path.match(/^\\/api\\/([^/]+)\\/([^/]+)$/);
+    const match = path.match(/^\/api\/([^/]+)\/([^/]+)$/);
     if (match) {
       return userRepo.fetch(request, env, ctx);
     }
